@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/dop251/goja"
 	"github.com/gin-gonic/gin"
 	"github.com/samber/lo"
 )
@@ -59,7 +60,8 @@ func serviceHandler(c *gin.Context) {
 		Body:    string(lo.Must(io.ReadAll(c.Request.Body))),
 	}
 
-	vm := service.VM
+	vm := goja.New()
+	vm.SetFieldNameMapper(goja.TagFieldNameMapper("json", false))
 	for k, v := range injections {
 		vm.Set(k, v)
 	}
