@@ -14,7 +14,6 @@ import (
 )
 
 type Service struct {
-	VM       *goja.Runtime
 	Program  *goja.Program
 	FilePath string
 }
@@ -68,16 +67,12 @@ func loadService(serviceName, filePath string) error {
 		return err
 	}
 
-	vm := goja.New()
-	vm.SetFieldNameMapper(goja.TagFieldNameMapper("json", false))
-
 	program, err := goja.Compile(filePath, string(data), false)
 	if err != nil {
 		return err
 	}
 
 	services[serviceName] = &Service{
-		VM:       vm,
 		Program:  program,
 		FilePath: filePath,
 	}

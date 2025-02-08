@@ -1,14 +1,21 @@
 // var rune_api_base = 'http://host.docker.internal:8580' // beta
 var rune_api_base = 'http://host.docker.internal:8570' // prod
 
+function firstOr(x, defaultValue) {
+    if (x && x.length > 0) {
+        return x[0]
+    }
+    return defaultValue
+}
+
 var payload = {
     func_name: 'FuncGetClaimEventRedeemEthereum',
     params: JSON.stringify({
-        offset: req.query.offset[0],
-        limit: req.query.limit[0],
-        start_time: req.query.start_time[0],
-        end_time: req.query.end_time[0],
-        user: req.query.user[0],
+        offset: firstOr(req.query.offset, ''),
+        limit: firstOr(req.query.limit, ''),
+        start_time: firstOr(req.query.start_time, ''),
+        end_time: firstOr(req.query.end_time, ''),
+        user: firstOr(req.query.user, ''),
     })
 }
 
