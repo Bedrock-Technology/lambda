@@ -17,3 +17,5 @@ services:
       - /home/ubuntu/lambda/config.toml:/app/config.toml
     ports:
       - "127.0.0.1:8000:8000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

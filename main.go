@@ -30,6 +30,7 @@ func main() {
 type rawRequest struct {
 	Method  string              `json:"method"`
 	Path    string              `json:"path"`
+	Query   map[string][]string `json:"query"`
 	Headers map[string][]string `json:"headers"`
 	Body    string              `json:"body"`
 }
@@ -53,6 +54,7 @@ func serviceHandler(c *gin.Context) {
 	r := rawRequest{
 		Method:  c.Request.Method,
 		Path:    c.Request.URL.Path,
+		Query:   c.Request.URL.Query(),
 		Headers: c.Request.Header,
 		Body:    string(lo.Must(io.ReadAll(c.Request.Body))),
 	}
