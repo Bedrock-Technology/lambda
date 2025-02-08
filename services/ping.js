@@ -1,0 +1,1 @@
+JSON.stringify({ msg: 'pong' })

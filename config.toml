@@ -1,0 +1,5 @@
+log_level = "DEBUG"
+listen = ":8000"
+
+services_dir = "services"
+api_prefix = "/services"
