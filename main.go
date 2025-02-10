@@ -66,12 +66,17 @@ func serviceHandler(c *gin.Context) {
 		return
 	}
 
+	body := ""
+	if c.Request.Body != nil {
+		body = string(lo.Must(io.ReadAll(c.Request.Body)))
+	}
+
 	r := rawRequest{
 		Method:  c.Request.Method,
 		Path:    c.Request.URL.Path,
 		Query:   c.Request.URL.Query(),
 		Headers: c.Request.Header,
-		Body:    string(lo.Must(io.ReadAll(c.Request.Body))),
+		Body:    body,
 	}
 
 	vm := vmPool.Get().(*goja.Runtime)
