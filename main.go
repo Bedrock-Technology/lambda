@@ -5,10 +5,24 @@ import (
 	"log/slog"
 	"net/http"
 	"strings"
+	"sync"
 
 	"github.com/dop251/goja"
 	"github.com/gin-gonic/gin"
 	"github.com/samber/lo"
+)
+
+var (
+	vmPool = &sync.Pool{
+		New: func() any {
+			vm := goja.New()
+			vm.SetFieldNameMapper(goja.TagFieldNameMapper("json", false))
+			for k, v := range injections {
+				vm.Set(k, v)
+			}
+			return vm
+		},
+	}
 )
 
 func setLogLevel() {
@@ -52,19 +66,22 @@ func serviceHandler(c *gin.Context) {
 		return
 	}
 
+	body := ""
+	if c.Request.Body != nil {
+		body = string(lo.Must(io.ReadAll(c.Request.Body)))
+	}
+
 	r := rawRequest{
 		Method:  c.Request.Method,
 		Path:    c.Request.URL.Path,
 		Query:   c.Request.URL.Query(),
 		Headers: c.Request.Header,
-		Body:    string(lo.Must(io.ReadAll(c.Request.Body))),
+		Body:    body,
 	}
 
-	vm := goja.New()
-	vm.SetFieldNameMapper(goja.TagFieldNameMapper("json", false))
-	for k, v := range injections {
-		vm.Set(k, v)
-	}
+	vm := vmPool.Get().(*goja.Runtime)
+	defer vmPool.Put(vm)
+
 	vm.Set("req", r)
 
 	result, err := vm.RunProgram(service.Program)
