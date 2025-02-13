@@ -1,6 +1,5 @@
-//var rune_api_base = 'http://host.docker.internal:8580' // beta
-//var rune_api_base = 'http://host.docker.internal:8570' // prod
-var rune_api_base = 'https://beta-rune.rockx.com'
+// var rune_api_base = 'http://host.docker.internal:8580' // beta
+var rune_api_base = 'http://host.docker.internal:8570' // prod
 
 function firstOr(x, defaultValue) {
     if (x && x.length > 0) {
