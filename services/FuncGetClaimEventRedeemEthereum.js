@@ -19,7 +19,7 @@ var payload = {
     })
 }
 
-var resp = fetch(rune_api_base + '/rune/execsql', {
+var resp = fetch(rune_api_base + '/dsn/execsql', {
     method: 'POST',
     body: JSON.stringify(payload)
 })
