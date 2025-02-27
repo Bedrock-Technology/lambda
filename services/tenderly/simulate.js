@@ -9,7 +9,7 @@ var simulateResp = fetch('https://api.tenderly.co/api/v1/account/me/project/proj
         'X-Access-Key': apiKey,
     },
     body: JSON.stringify({
-        network_id: Number(obj.chain_id),
+        network_id: Number(obj.chain_id || 1),
         block_number: Number(obj.block_number),
         from: obj.from,
         to: obj.to,
@@ -21,6 +21,10 @@ var simulateResp = fetch('https://api.tenderly.co/api/v1/account/me/project/proj
 })
 
 var simulateRespObj = JSON.parse(simulateResp.body)
+if (simulateRespObj.error) {
+    throw new Error(JSON.stringify(simulateRespObj.error))
+}
+
 var simId = simulateRespObj.simulation.id
 
 var shareResp = fetch('https://api.tenderly.co/api/v1/account/me/project/project/simulations/' + simId + '/share', {
