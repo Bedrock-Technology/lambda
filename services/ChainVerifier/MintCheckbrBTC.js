@@ -1,5 +1,10 @@
-// var rune_api_base = 'http://host.docker.internal:8580' // beta
-var rune_api_base = 'http://host.docker.internal:8570' // prod
+// var runeAPIBase = 'http://host.docker.internal:8580' // beta
+var runeAPIBase = 'http://host.docker.internal:8570' // prod
+
+var chainNameMap = {
+    1: 'ethereum',
+    56: 'bsc',
+}
 
 function firstOr(x, defaultValue) {
     if (x && x.length > 0) {
@@ -8,14 +13,22 @@ function firstOr(x, defaultValue) {
     return defaultValue
 }
 
-function getAmountByFunc(funcName, addr, start, end) {
+function getAmountByFunc(chainId, addr, start, end) {
+    var funcName = 'FUNGetUserMintedBrBtcAmountALLCHAIN'
+    var params = {
+        user: addr,
+        start_time: start,
+        end_time: end,
+    }
+
+    if (chainId != 0 && chainNameMap[chainId] != '') {
+        funcName = 'FUNGetUserMintedBrBtcAmountCHAIN'
+        params.chain_name = chainNameMap[chainId]
+    }
+
     var payload = {
         func_name: funcName,
-        params: JSON.stringify({
-            user: addr,
-            start_time: start,
-            end_time: end,
-        })
+        params: JSON.stringify(params)
     }
 
     var resp = fetch(rune_api_base + '/dsn/execsql', {
@@ -31,12 +44,13 @@ function getAmountByFunc(funcName, addr, start, end) {
     return mintedAmount
 }
 
+var chainId = firstOr(req.query.chain_id, 0)
 var addr = firstOr(req.query.address, '')
 var start = firstOr(req.query.from, 0)
 var end = firstOr(req.query.to, 0)
 var amountLimit = firstOr(req.query.amount, 0)
 
-var brBTCAmount = getAmountByFunc('FUNGetUserMintedBrBtcAmountALLCHAIN', addr, start, end)
+var brBTCAmount = getAmountByFunc(chainId, addr, start, end)
 
 JSON.stringify({
     result: brBTCAmount >= amountLimit
