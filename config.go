@@ -10,6 +10,7 @@ import (
 type Config struct {
 	LogLevel    string `mapstructure:"log_level"`
 	Listen      string `mapstructure:"listen"`
+	Watchexec   string `mapstructure:"watchexec"`
 	ServicesDir string `mapstructure:"services_dir"`
 	APIPrefix   string `mapstructure:"api_prefix"`
 }

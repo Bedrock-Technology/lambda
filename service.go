@@ -1,15 +1,18 @@
 package main
 
 import (
+	"bufio"
+	"encoding/json"
+	"fmt"
 	"io/fs"
 	"log/slog"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"sync"
 
 	"github.com/dop251/goja"
-	"github.com/fsnotify/fsnotify"
 	"github.com/samber/lo"
 )
 
@@ -24,7 +27,7 @@ var (
 )
 
 func loadServicesAndWatch(dir string) {
-	dirsToWatch, serviceFiles := lo.Must2(walkDir(cfg.ServicesDir))
+	_, serviceFiles := lo.Must2(walkDir(cfg.ServicesDir))
 
 	for _, servicePath := range serviceFiles {
 		serviceName := strings.TrimPrefix(servicePath, dir)
@@ -41,7 +44,7 @@ func loadServicesAndWatch(dir string) {
 		}
 	}
 
-	go watchServicesDir(cfg.ServicesDir, dirsToWatch)
+	go watchServicesDir(cfg.ServicesDir, "js")
 }
 
 func walkDir(dir string) (subDirs []string, files []string, err error) {
@@ -79,64 +82,86 @@ func loadService(serviceName, filePath string) error {
 	return nil
 }
 
-func watchServicesDir(dir string, dirsToWatch []string) {
-	watcher := lo.Must(fsnotify.NewWatcher())
-	defer watcher.Close()
+type watchexecTag struct {
+	Kind     string `json:"kind"`
+	Source   string `json:"source"`
+	Simple   string `json:"simple"`
+	Full     string `json:"full"`
+	Absolute string `json:"absolute"`
+	Filetype string `json:"filetype"`
+}
 
-	go func() {
-		for {
-			select {
-			case event, ok := <-watcher.Events:
-				if !ok {
-					return
-				}
-				slog.Info("watchServicesDir()", "event", event)
+type watchexecEvent struct {
+	Tags []watchexecTag `json:"tags"`
+}
 
-				serviceName := strings.TrimPrefix(event.Name, dir)
-				serviceName = strings.TrimPrefix(serviceName, "/")
+type event struct {
+	Source   string
+	FsSimple string
+	FsFull   string
+	Path     string
+}
 
-				switch {
-				case event.Has(fsnotify.Create) || event.Has(fsnotify.Write):
-					if lo.Must(os.Stat(event.Name)).IsDir() {
-						watcher.Add(event.Name)
-						slog.Info("watcher.Add()", "watching", event.Name)
-						break
-					}
-
-					if !strings.HasSuffix(event.Name, ".js") {
-						slog.Info("watchServicesDir() not a js file", "name", event.Name)
-						break
-					}
-
-					servicesLock.Lock()
-					err := loadService(serviceName, event.Name)
-					servicesLock.Unlock()
-
-					if err != nil {
-						slog.Error("watchServicesDir() loadService", "name", event.Name, "err", err)
-					} else {
-						slog.Info("watchServicesDir() loaded service", "name", event.Name)
-					}
-				case event.Has(fsnotify.Remove) || event.Has(fsnotify.Rename):
-					servicesLock.Lock()
-					delete(services, serviceName)
-					servicesLock.Unlock()
-
-					slog.Info("watchServicesDir() deleted service", "name", serviceName)
-				default:
-				}
-			case err, ok := <-watcher.Errors:
-				if !ok {
-					return
-				}
-				slog.Error("watchServicesDir()", "error", err)
-			}
-		}
-	}()
-
-	for _, d := range dirsToWatch {
-		watcher.Add(d)
-		slog.Info("watcher.Add()", "watching", d)
+func parseEvent(data []byte) (*event, error) {
+	we := watchexecEvent{}
+	if err := json.Unmarshal(data, &we); err != nil {
+		return nil, err
 	}
-	select {}
+
+	if len(we.Tags) < 3 {
+		return nil, fmt.Errorf("invalid event: %v", we)
+	}
+
+	return &event{
+		Source:   we.Tags[0].Source,
+		FsSimple: we.Tags[1].Simple,
+		FsFull:   we.Tags[1].Full,
+		Path:     we.Tags[2].Absolute,
+	}, nil
+}
+
+func watchServicesDir(dir string, ext string) {
+	dirPrefix := lo.Must(filepath.Abs(dir))
+
+	args := []string{
+		"-w", dir,
+		"-e", ext,
+		"--emit-events-to=json-stdio",
+		"--only-emit-events",
+	}
+
+	slog.Info("watchexec", "args", args)
+	watchCmd := exec.Command(cfg.Watchexec, args...)
+
+	out := lo.Must(watchCmd.StdoutPipe())
+	defer out.Close()
+
+	lo.Must0(watchCmd.Start())
+
+	scanner := bufio.NewScanner(out)
+	for scanner.Scan() {
+		e := lo.Must(parseEvent(scanner.Bytes()))
+		slog.Info("watchServicesDir()", "event", e)
+
+		switch e.FsSimple {
+		case "create", "modify", "remove":
+			serviceName := strings.TrimPrefix(e.Path, dirPrefix)
+			serviceName = strings.TrimPrefix(serviceName, "/")
+
+			servicesLock.Lock()
+			_, err := os.Stat(e.Path)
+			if err != nil {
+				delete(services, serviceName)
+			} else {
+				err = loadService(serviceName, e.Path)
+			}
+			servicesLock.Unlock()
+
+			if err != nil {
+				slog.Error("watchServicesDir() loadService", "path", e.Path, "err", err)
+			}
+		default:
+			slog.Warn("watchServicesDir() unknown event", "event", e)
+		}
+	}
 }
