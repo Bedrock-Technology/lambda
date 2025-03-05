@@ -3,7 +3,17 @@ var runeAPIBase = 'http://host.docker.internal:8570' // prod
 
 var chainNameMap = {
     1: 'ethereum',
+    10: 'optimism',
     56: 'bsc',
+    5000: 'mantle',
+    34443: 'mode',
+    42161: 'arbitrum',
+    223: 'b2',
+    80094: 'bera',
+    200901: 'bitlayer',
+    60808: 'bob',
+    4200: 'merlin',
+    7000: 'zeta'
 }
 
 function firstOr(x, defaultValue) {
@@ -13,8 +23,8 @@ function firstOr(x, defaultValue) {
     return defaultValue
 }
 
-function getAmountByFunc(chainId, addr, start, end) {
-    var funcName = 'FUNGetUserMintedBrBtcAmountALLCHAIN'
+function getAmountByFunc(funcNames, chainId, addr, start, end) {
+    var funcName = funcNames[0]
     var params = {
         user: addr,
         start_time: start,
@@ -22,7 +32,7 @@ function getAmountByFunc(chainId, addr, start, end) {
     }
 
     if (chainId != 0 && chainNameMap[chainId] != '') {
-        funcName = 'FUNGetUserMintedBrBtcAmountCHAIN'
+        funcName = funcNames[1]
         params.chain_name = chainNameMap[chainId]
     }
 
@@ -50,7 +60,7 @@ var start = firstOr(req.query.from, 0)
 var end = firstOr(req.query.to, 0)
 var amountLimit = firstOr(req.query.amount, 0)
 
-var brBTCAmount = getAmountByFunc(chainId, addr, start, end)
+var brBTCAmount = getAmountByFunc(['FUNGetUserMintedBrBtcAmountALLCHAIN', 'FUNGetUserMintedBrBtcAmountCHAIN'], chainId, addr, start, end)
 
 JSON.stringify({
     result: brBTCAmount >= amountLimit

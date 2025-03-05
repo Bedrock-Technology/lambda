@@ -23,8 +23,8 @@ function firstOr(x, defaultValue) {
     return defaultValue
 }
 
-function getAmountByFunc(chainId, addr, start, end) {
-    var funcName = 'FUNGetUserMintedUniBtcAmountALLCHAIN'
+function getAmountByFunc(funcNames, chainId, addr, start, end) {
+    var funcName = funcNames[0]
     var params = {
         user: addr,
         start_time: start,
@@ -32,7 +32,7 @@ function getAmountByFunc(chainId, addr, start, end) {
     }
 
     if (chainId != 0 && chainNameMap[chainId] != '') {
-        funcName = 'FUNGetUserMintedUniBtcAmountCHAIN'
+        funcName = funcNames[1]
         params.chain_name = chainNameMap[chainId]
     }
 
@@ -60,7 +60,7 @@ var start = firstOr(req.query.from, 0)
 var end = firstOr(req.query.to, 0)
 var amountLimit = firstOr(req.query.amount, 0)
 
-var uniBTCAmount = getAmountByFunc(chainId, addr, start, end)
+var uniBTCAmount = getAmountByFunc(['FUNGetUserMintedUniBtcAmountALLCHAIN', 'FUNGetUserMintedUniBtcAmountCHAIN'], chainId, addr, start, end)
 
 JSON.stringify({
     result: uniBTCAmount >= amountLimit
