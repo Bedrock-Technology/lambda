@@ -31,7 +31,7 @@ function getAmountByFunc(chainId, addr, start, end) {
         params: JSON.stringify(params)
     }
 
-    var resp = fetch(rune_api_base + '/dsn/execsql', {
+    var resp = fetch(runeAPIBase + '/dsn/execsql', {
         method: 'POST',
         body: JSON.stringify(payload)
     })
