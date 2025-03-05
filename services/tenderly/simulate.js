@@ -22,7 +22,7 @@ var simulateResp = fetch('https://api.tenderly.co/api/v1/account/me/project/proj
 
 var simulateRespObj = JSON.parse(simulateResp.body)
 if (simulateRespObj.error) {
-    throw new Error(JSON.stringify(simulateRespObj.error))
+    throw JSON.stringify(simulateRespObj.error)
 }
 
 var simId = simulateRespObj.simulation.id
