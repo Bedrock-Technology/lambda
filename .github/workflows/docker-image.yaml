@@ -20,6 +20,16 @@ jobs:
         with:
           strip_v: false
 
+      - name: Setup cargo binstall
+        uses: cargo-bins/cargo-binstall@main
+
+      - name: Install watchexec from crates.io
+        run: |
+          cargo binstall watchexec-cli --target x86_64-unknown-linux-musl
+          which watchexec
+          ldd $(which watchexec)
+          cp $(which watchexec) ./
+
       - name: Set up Go
         uses: actions/setup-go@v5
         with:

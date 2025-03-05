@@ -1,5 +1,6 @@
 log_level = "DEBUG"
 listen = ":8000"
 
+watchexec = "/app/watchexec"
 services_dir = "services"
 api_prefix = "/services"

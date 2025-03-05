@@ -4,6 +4,7 @@ LABEL org.opencontainers.image.source=https://github.com/Bedrock-Technology/lamb
 
 WORKDIR /app
 
+COPY ./watchexec /app/watchexec
 COPY ./lambda /app/lambda
 
 ENTRYPOINT ["/app/lambda"]

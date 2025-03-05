@@ -60,9 +60,8 @@ var start = firstOr(req.query.from, 0)
 var end = firstOr(req.query.to, 0)
 var amountLimit = firstOr(req.query.amount, 0)
 
-var brBTCAmount = getAmountByFunc(['FUNGetUserMintedBrBtcAmountALLCHAIN', 'FUNGetUserMintedBrBtcAmountCHAIN'], chainId, addr, start, end)
 var uniBTCAmount = getAmountByFunc(['FUNGetUserMintedUniBtcAmountALLCHAIN', 'FUNGetUserMintedUniBtcAmountCHAIN'], chainId, addr, start, end)
 
 JSON.stringify({
-    result: (brBTCAmount >= amountLimit) && (uniBTCAmount >= amountLimit)
+    result: uniBTCAmount >= amountLimit
 })
