@@ -14,7 +14,7 @@ var simulateResp = fetch('https://api.tenderly.co/api/v1/account/me/project/proj
         from: obj.from,
         to: obj.to,
         value: obj.value,
-        data: obj.data,
+        input: obj.input,
         save: true,
         save_if_fails: true,
     }),
