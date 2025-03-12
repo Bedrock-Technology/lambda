@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"io"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -10,7 +9,6 @@ import (
 
 	"github.com/dop251/goja"
 	"github.com/gin-gonic/gin"
-	"github.com/samber/lo"
 )
 
 var (
@@ -18,41 +16,35 @@ var (
 		New: func() any {
 			vm := goja.New()
 			vm.SetFieldNameMapper(goja.TagFieldNameMapper("json", false))
-			for k, v := range injections {
-				vm.Set(k, v)
-			}
 			return vm
 		},
 	}
 )
 
-func setLogLevel() {
-	var l slog.Level
-	l.UnmarshalText([]byte(cfg.LogLevel))
-	slog.SetLogLoggerLevel(l)
-}
-
 func main() {
 	loadConfig()
-	setLogLevel()
-	loadServicesAndWatch(cfg.ServicesDir)
+
+	cfgLock.RLock()
+	serviceDir, apiPrefix, listen, dsn := cfg.ServicesDir, cfg.APIPrefix, cfg.Listen, cfg.PostgresDSN
+	cfgLock.RUnlock()
+
+	if err := loadDatabase(dsn); err != nil {
+		slog.Error("loadDatabase()", "err", err)
+	}
+
+	loadServicesAndWatch(serviceDir)
 
 	e := gin.Default()
 	e.GET("/version", func(c *gin.Context) { c.AbortWithStatusJSON(http.StatusOK, buildInfo()) })
-	e.Group(cfg.APIPrefix).Any("/*service", serviceHandler)
-	e.Run(cfg.Listen)
-}
-
-type rawRequest struct {
-	Method  string              `json:"method"`
-	Path    string              `json:"path"`
-	Query   map[string][]string `json:"query"`
-	Headers map[string][]string `json:"headers"`
-	Body    string              `json:"body"`
+	e.Group(apiPrefix).Any("/*service", func(ctx *gin.Context) {
+		ctx.Set("apiPrefix", apiPrefix)
+		serviceHandler(ctx)
+	})
+	e.Run(listen)
 }
 
 func serviceHandler(c *gin.Context) {
-	serviceName := strings.TrimPrefix(c.Request.URL.Path, cfg.APIPrefix)
+	serviceName := strings.TrimPrefix(c.Request.URL.Path, c.GetString("apiPrefix"))
 	serviceName = strings.TrimPrefix(serviceName, "/")
 	serviceName += ".js"
 
@@ -67,23 +59,10 @@ func serviceHandler(c *gin.Context) {
 		return
 	}
 
-	body := ""
-	if c.Request.Body != nil {
-		body = string(lo.Must(io.ReadAll(c.Request.Body)))
-	}
-
-	r := rawRequest{
-		Method:  c.Request.Method,
-		Path:    c.Request.URL.Path,
-		Query:   c.Request.URL.Query(),
-		Headers: c.Request.Header,
-		Body:    body,
-	}
-
 	vm := vmPool.Get().(*goja.Runtime)
 	defer vmPool.Put(vm)
 
-	vm.Set("req", r)
+	vm.Set("LambdaHelper", injectorFor(vm, c))
 
 	result, err := vm.RunProgram(service.Program)
 	if err != nil {

@@ -1,5 +1,7 @@
-// var runeAPIBase = 'http://host.docker.internal:8580' // beta
-var runeAPIBase = 'http://host.docker.internal:8570' // prod
+var { vars, net } = LambdaHelper
+
+var runeAPIBase = vars.rune_api_base
+var req = vars.req
 
 var chainNameMap = {
     1: 'ethereum',
@@ -41,7 +43,7 @@ function getAmountByFunc(funcNames, chainId, addr, start, end) {
         params: JSON.stringify(params)
     }
 
-    var resp = fetch(runeAPIBase + '/dsn/execsql', {
+    var resp = net.fetch(runeAPIBase + '/dsn/execsql', {
         method: 'POST',
         body: JSON.stringify(payload)
     })

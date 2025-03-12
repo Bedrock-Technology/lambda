@@ -27,7 +27,7 @@ var (
 )
 
 func loadServicesAndWatch(dir string) {
-	_, serviceFiles := lo.Must2(walkDir(cfg.ServicesDir))
+	_, serviceFiles := lo.Must2(walkDir(dir))
 
 	for _, servicePath := range serviceFiles {
 		serviceName := strings.TrimPrefix(servicePath, dir)
@@ -44,7 +44,7 @@ func loadServicesAndWatch(dir string) {
 		}
 	}
 
-	go watchServicesDir(cfg.ServicesDir, "js")
+	go watchServicesDir(dir, "js")
 }
 
 func walkDir(dir string) (subDirs []string, files []string, err error) {
@@ -123,6 +123,10 @@ func parseEvent(data []byte) (*event, error) {
 func watchServicesDir(dir string, ext string) {
 	dirPrefix := lo.Must(filepath.Abs(dir))
 
+	cfgLock.RLock()
+	watchexec := cfg.Watchexec
+	cfgLock.RUnlock()
+
 	args := []string{
 		"-w", dir,
 		"-e", ext,
@@ -131,7 +135,7 @@ func watchServicesDir(dir string, ext string) {
 	}
 
 	slog.Info("watchexec", "args", args)
-	watchCmd := exec.Command(cfg.Watchexec, args...)
+	watchCmd := exec.Command(watchexec, args...)
 
 	out := lo.Must(watchCmd.StdoutPipe())
 	defer out.Close()

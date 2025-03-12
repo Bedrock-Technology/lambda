@@ -1,5 +1,7 @@
-// var rune_api_base = 'http://host.docker.internal:8580' // beta
-var rune_api_base = 'http://host.docker.internal:8570' // prod
+var { vars, net } = LambdaHelper
+
+var runeAPIBase = vars.rune_api_base
+var req = vars.req
 
 var token = []
 if (req.query.tokens && req.query.tokens.length > 0) {
@@ -11,7 +13,7 @@ var payload = {
     params: JSON.stringify({ token: token })
 }
 
-var resp = fetch(rune_api_base + '/dsn/execsql', {
+var resp = net.fetch(rune_api_base + '/dsn/execsql', {
     method: 'POST',
     body: JSON.stringify(payload)
 })
