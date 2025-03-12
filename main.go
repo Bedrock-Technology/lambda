@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -65,11 +66,33 @@ func serviceHandler(c *gin.Context) {
 
 	result, err := vm.RunProgram(service.Program)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
+		resp := make(gin.H)
+
+		errMsg := err.Error()
+		if ex, ok := err.(*goja.Exception); ok {
+			errMsg = ex.Value().String()
+		}
+
+		if isJSON([]byte(errMsg)) {
+			var x any
+			json.Unmarshal([]byte(errMsg), &x)
+			resp["err"] = x
+		} else {
+			resp["err"] = errMsg
+		}
+		c.AbortWithStatusJSON(http.StatusInternalServerError, resp)
 		return
 	}
 
 	respRaw := result.Export().(string)
+	if isJSON([]byte(respRaw)) {
+		c.Writer.Header().Set("Content-Type", "application/json")
+	}
 	c.String(http.StatusOK, "%s", respRaw)
 	c.Abort()
+}
+
+func isJSON(data []byte) bool {
+	var js json.RawMessage
+	return json.Unmarshal(data, &js) == nil
 }
