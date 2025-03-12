@@ -4,3 +4,11 @@ listen = ":8000"
 watchexec = "/app/watchexec"
 services_dir = "services"
 api_prefix = "/services"
+
+postgres_dsn = "host= port=5432 user=dev password= dbname=postgres search_path=public TimeZone=Asia/Singapore connect_timeout=10 sslmode=disable"
+
+[vars]
+var_a = "aaaa"
+
+[vars_desc]
+var_a = "var a description"

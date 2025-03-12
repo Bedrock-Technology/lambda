@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log/slog"
 	"net/http"
 	"testing"
 
@@ -9,14 +10,19 @@ import (
 
 func BenchmarkVm(b *testing.B) {
 	loadConfig()
-	setLogLevel()
-	loadServicesAndWatch(cfg.ServicesDir)
+
+	cfgLock.RLock()
+	serviceDir, apiPrefix := cfg.ServicesDir, cfg.APIPrefix
+	cfgLock.RUnlock()
+
+	loadServicesAndWatch(serviceDir)
 
 	gin.SetMode(gin.ReleaseMode)
+	slog.SetLogLoggerLevel(slog.LevelError)
 
 	e := gin.Default()
 	e.GET("/version", func(c *gin.Context) { c.AbortWithStatusJSON(http.StatusOK, buildInfo()) })
-	e.Group(cfg.APIPrefix).Any("/*service", serviceHandler)
+	e.Group(apiPrefix).Any("/*service", serviceHandler)
 
 	runRequest(b, e, http.MethodGet, "/services/utils/dump")
 }

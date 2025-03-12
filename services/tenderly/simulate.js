@@ -1,6 +1,7 @@
-var apiKey = ''
+var { vars } = LambdaHelper
 
-var obj = JSON.parse(req.body)
+var apiKey = vars.tenderly_api_key
+var obj = JSON.parse(vars.req.body)
 
 var simulateResp = fetch('https://api.tenderly.co/api/v1/account/me/project/project/simulate', {
     method: 'POST',

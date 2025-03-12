@@ -2,57 +2,104 @@ package main
 
 import (
 	"io"
-	"log/slog"
-	"net/http"
-	"strings"
+
+	"github.com/Bedrock-Technology/lambda/core"
+
+	"github.com/dop251/goja"
+	"github.com/gin-gonic/gin"
+	"github.com/samber/lo"
 )
 
 var (
-	injections = map[string]any{
-		"fetch": fetch,
+	injections = map[string]map[string]any{
+		"crypto": {
+			"description": map[string]any{
+				"keccak256": "Calculates the Keccak-256 hash of the input.",
+				"ecrecover": "Recovers the address associated with the public key from a message and a signature.",
+			},
+			"keccak256": core.Keccak256,
+			"ecrecover": core.Ecrecover,
+		},
+		"net": {
+			"description": map[string]any{
+				"fetch": "Performs an HTTP request.",
+			},
+			"fetch": core.Fetch,
+		},
+		"db": {
+			"description": map[string]any{
+				"insert": "Inserts a record into the database.",
+				"select": "Selects records from the database.",
+			},
+			"select": func(query string) ([]map[string]any, error) {
+				return core.TableSelect(db, query)
+			},
+			"insert": func(table string, obj map[string]any) error {
+				return core.TableInsert(db, table, obj)
+			},
+		},
+		"utils": {
+			"description": map[string]any{
+				"validate_address": "Validates an Ethereum address.",
+			},
+			"validate_address": core.ValidateAddress,
+		},
 	}
 )
 
-type fetchArgs struct {
-	Method  string            `json:"method"`
-	Headers map[string]string `json:"headers"`
-	Body    string            `json:"body"`
+func injectorFor(vm *goja.Runtime, ctx *gin.Context) *goja.Object {
+	mp := make(map[string]any)
+	for k, v := range injections {
+		if k == "db" && db == nil {
+			continue
+		}
+		mp[k] = mapToObject(vm, v)
+	}
+	mp["vars"] = makeVarsObj(vm, ctx)
+
+	return mapToObject(vm, mp)
 }
 
-type fetchResp struct {
-	Status int    `json:"status"`
-	Body   string `json:"body"`
+type rawRequest struct {
+	Method  string              `json:"method"`
+	Path    string              `json:"path"`
+	Query   map[string][]string `json:"query"`
+	Headers map[string][]string `json:"headers"`
+	Body    string              `json:"body"`
 }
 
-func fetch(url string, args fetchArgs) (*fetchResp, error) {
-	slog.Debug("fetch()", "url", url, "args", args)
+func makeVarsObj(vm *goja.Runtime, ctx *gin.Context) *goja.Object {
+	cfgLock.RLock()
+	vars, varsDesc := cfg.Vars, cfg.VarsDesc
+	cfgLock.RUnlock()
 
-	var body io.Reader
-	if args.Body != "" {
-		body = io.NopCloser(strings.NewReader(args.Body))
-	}
+	varsObj := mapToObject(vm, lo.MapEntries(vars, func(k1, v1 string) (string, any) {
+		return k1, v1
+	}))
 
-	req, err := http.NewRequest(args.Method, url, body)
-	if err != nil {
-		return nil, err
+	body := ""
+	if ctx.Request.Body != nil {
+		body = string(lo.Must(io.ReadAll(ctx.Request.Body)))
 	}
-	for k, v := range args.Headers {
-		req.Header.Set(k, v)
+	r := rawRequest{
+		Method:  ctx.Request.Method,
+		Path:    ctx.Request.URL.Path,
+		Query:   ctx.Request.URL.Query(),
+		Headers: ctx.Request.Header,
+		Body:    body,
 	}
+	varsObj.Set("req", r)
 
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
+	varsDesc["req"] = "The request object."
+	varsObj.Set("description", varsDesc)
 
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
+	return varsObj
+}
 
-	return &fetchResp{
-		Status: resp.StatusCode,
-		Body:   string(respBody),
-	}, nil
+func mapToObject(vm *goja.Runtime, mp map[string]any) *goja.Object {
+	obj := vm.NewObject()
+	for k, v := range mp {
+		obj.Set(k, v)
+	}
+	return obj
 }
