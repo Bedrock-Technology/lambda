@@ -2,6 +2,7 @@ package main
 
 import (
 	"io"
+	"strings"
 
 	"github.com/Bedrock-Technology/lambda/core"
 
@@ -40,9 +41,13 @@ var (
 		},
 		"utils": {
 			"description": map[string]any{
-				"validate_address": "Validates an Ethereum address.",
+				"hex_to_address":     "Converts a hexadecimal string to an Ethereum address.",
+				"strings_equal_fold": "Compares two strings case-insensitively.",
+				"hash_typed_data":    "Hashes a typed data object.",
 			},
-			"validate_address": core.ValidateAddress,
+			"hex_to_address":     core.HexToAddress,
+			"strings_equal_fold": strings.EqualFold,
+			"hash_typed_data":    core.HashTypedData,
 		},
 	}
 )

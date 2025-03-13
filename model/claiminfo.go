@@ -11,9 +11,7 @@ type ClaimInfo struct {
 	CexType        string `gorm:"type:varchar(255);not null;index"`
 	CexUid         string `gorm:"type:varchar(255);not null"`
 	DepositAddress string `gorm:"type:varchar(255);not null"`
-
-	MsgRaw    string `gorm:"type:varchar(2048);not null"`
-	Signature string `gorm:"type:varchar(255);not null"`
+	Signature      string `gorm:"type:varchar(255);not null"`
 }
 
 func (ClaimInfo) TableName() string {

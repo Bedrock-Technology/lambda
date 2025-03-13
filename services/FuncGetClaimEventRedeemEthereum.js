@@ -21,7 +21,7 @@ var payload = {
     })
 }
 
-var resp = net.fetch(rune_api_base + '/dsn/execsql', {
+var resp = net.fetch(runeAPIBase + '/dsn/execsql', {
     method: 'POST',
     body: JSON.stringify(payload)
 })
