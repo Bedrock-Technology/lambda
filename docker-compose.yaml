@@ -10,11 +10,11 @@ services:
       timeout: 2s
       retries: 5
     environment:
-      CFG_FILE: /app/config.toml
+      CFG_FILE: /app/conf/config.toml
       CFG_FORMAT: toml
     volumes:
       - /home/ubuntu/lambda/services:/app/services
-      - /home/ubuntu/lambda/config.toml:/app/config.toml
+      - /home/ubuntu/lambda/conf:/app/conf
     ports:
       - "127.0.0.1:8000:8000"
     extra_hosts:

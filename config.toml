@@ -8,7 +8,11 @@ api_prefix = "/services"
 postgres_dsn = "host= port=5432 user=dev password= dbname=postgres search_path=public TimeZone=Asia/Singapore connect_timeout=10 sslmode=disable"
 
 [vars]
-var_a = "aaaa"
+rune_api_base = ""
+tenderly_api_key = ""
+claim_info_table = ""
 
 [vars_desc]
-var_a = "var a description"
+rune_api_base = "rune api base url"
+tenderly_api_key = "tenderly api key"
+claim_info_table = "claim info table name"
