@@ -1,9 +1,9 @@
-var { vars } = LambdaHelper
+var { vars, net } = LambdaHelper
 
 var apiKey = vars.tenderly_api_key
 var obj = JSON.parse(vars.req.body)
 
-var simulateResp = fetch('https://api.tenderly.co/api/v1/account/me/project/project/simulate', {
+var simulateResp = net.fetch('https://api.tenderly.co/api/v1/account/me/project/project/simulate', {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json',
@@ -28,7 +28,7 @@ if (simulateRespObj.error) {
 
 var simId = simulateRespObj.simulation.id
 
-var shareResp = fetch('https://api.tenderly.co/api/v1/account/me/project/project/simulations/' + simId + '/share', {
+var shareResp = net.fetch('https://api.tenderly.co/api/v1/account/me/project/project/simulations/' + simId + '/share', {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json',

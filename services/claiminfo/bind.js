@@ -1,4 +1,4 @@
-var { crypto, vars, db } = LambdaHelper
+var { crypto, vars, db, utils } = LambdaHelper
 
 function require(x, msg) {
     if (!x) {
@@ -7,23 +7,32 @@ function require(x, msg) {
 }
 
 var bodyObj = JSON.parse(vars.req.body)
-require(utils.validate_address(bodyObj.address), 'invalid addr')
+
+var standardAddr = utils.hex_to_address(bodyObj.address)
+require(utils.strings_equal_fold(standardAddr, bodyObj.address), 'invalid addr')
 
 var addr = crypto.ecrecover(crypto.keccak256(bodyObj.msg), bodyObj.signature)
-require(addr == bodyObj.address, 'invalid signature')
+require(addr == standardAddr, 'invalid signature')
 
 db.insert("claim_info", {
     created_at: (new Date()).toJSON(),
     updated_at: (new Date()).toJSON(),
-    address: bodyObj.address,
+    address: standardAddr,
     cex_type: bodyObj.cex_type,
     cex_uid: bodyObj.cex_uid,
     deposit_address: bodyObj.deposit_address,
+    msg_raw: bodyObj.msg,
     signature: bodyObj.signature,
 })
 
-var data = db.select(`select * from public.claim_info where address='${addr}'`)
+var data = db.select(`select * from public.claim_info where address='${addr}' limit 1`)
+
+var resp = null
+if (data.length > 0) {
+    resp = data[0]
+}
 
 JSON.stringify({
-    data: data,
+    data: resp,
 })
+

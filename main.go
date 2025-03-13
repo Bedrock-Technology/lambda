@@ -35,11 +35,14 @@ func main() {
 	loadServicesAndWatch(serviceDir)
 
 	e := gin.Default()
+	e.RemoteIPHeaders = append([]string{"Cf-Connecting-Ip"}, e.RemoteIPHeaders...)
+
 	e.GET("/version", func(c *gin.Context) { c.AbortWithStatusJSON(http.StatusOK, buildInfo()) })
 	e.Group(apiPrefix).Any("/*service", func(ctx *gin.Context) {
 		ctx.Set("apiPrefix", apiPrefix)
 		serviceHandler(ctx)
 	})
+
 	e.Run(listen)
 }
 

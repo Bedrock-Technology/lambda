@@ -17,7 +17,7 @@ var addr = firstOr(vars.req.query.addr, '')
 var standardAddr = utils.hex_to_address(addr)
 require(utils.strings_equal_fold(standardAddr, addr), 'invalid addr')
 
-var data = db.select(`select address, cex_type, cex_uid, deposit_address, created_at from public.claim_info where address='${standardAddr}' limit 1`)
+var data = db.select(`select address, total_points from public.snapshot_diamond_points where address='${standardAddr}' limit 1`)
 
 var resp = null
 if (data.length > 0) {
