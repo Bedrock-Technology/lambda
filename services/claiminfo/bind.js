@@ -13,7 +13,30 @@ var bodyObj = JSON.parse(vars.req.body)
 var standardAddr = utils.hex_to_address(bodyObj.address)
 require(utils.strings_equal_fold(standardAddr, bodyObj.address), 'invalid addr')
 
-var addr = crypto.ecrecover(crypto.keccak256(bodyObj.msg), bodyObj.signature)
+var typedData = {
+    primaryType: 'Deposit',
+    types: {
+        EIP712Domain: [
+            { name: 'version', type: 'string' },
+        ],
+        Deposit: [
+            { name: 'Exchange Name', type: 'string' },
+            { name: 'Exchange UID', type: 'string' },
+            { name: 'Deposit Address', type: 'string' },
+        ],
+    },
+    domain: {
+        version: '1',
+    },
+    message: {
+        'Deposit Address': bodyObj.deposit_address,
+        'Exchange Name': bodyObj.cex_type,
+        'Exchange UID': bodyObj.cex_uid,
+    },
+}
+
+var hash = utils.hash_typed_data(JSON.stringify(typedData))
+var addr = crypto.ecrecover(hash, bodyObj.signature)
 require(addr == standardAddr, 'invalid signature')
 
 db.insert(`${tableName}`, {
@@ -23,7 +46,6 @@ db.insert(`${tableName}`, {
     cex_type: bodyObj.cex_type,
     cex_uid: bodyObj.cex_uid,
     deposit_address: bodyObj.deposit_address,
-    msg_raw: bodyObj.msg,
     signature: bodyObj.signature,
 })
 

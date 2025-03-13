@@ -43,9 +43,11 @@ var (
 			"description": map[string]any{
 				"hex_to_address":     "Converts a hexadecimal string to an Ethereum address.",
 				"strings_equal_fold": "Compares two strings case-insensitively.",
+				"hash_typed_data":    "Hashes a typed data object.",
 			},
 			"hex_to_address":     core.HexToAddress,
 			"strings_equal_fold": strings.EqualFold,
+			"hash_typed_data":    core.HashTypedData,
 		},
 	}
 )
