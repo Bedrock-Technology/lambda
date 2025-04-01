@@ -25,11 +25,19 @@ func main() {
 	loadConfig()
 
 	cfgLock.RLock()
-	serviceDir, apiPrefix, listen, dsn := cfg.ServicesDir, cfg.APIPrefix, cfg.Listen, cfg.PostgresDSN
+	serviceDir, apiPrefix, listen, postgresDSN, clickhouseDSN := cfg.ServicesDir, cfg.APIPrefix, cfg.Listen, cfg.PostgresDSN, cfg.ClickhouseDSN
 	cfgLock.RUnlock()
 
-	if err := loadDatabase(dsn); err != nil {
-		slog.Error("loadDatabase()", "err", err)
+	if postgresDSN != "" {
+		if err := loadDatabase(postgresDSN); err != nil {
+			slog.Error("loadDatabase()", "err", err)
+		}
+	}
+
+	if clickhouseDSN != "" {
+		if err := loadClickhouse(clickhouseDSN); err != nil {
+			slog.Error("loadClickhouse()", "err", err)
+		}
 	}
 
 	loadServicesAndWatch(serviceDir)
