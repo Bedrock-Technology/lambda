@@ -7,7 +7,7 @@ require (
 	github.com/cosmos/cosmos-sdk v0.50.13
 	github.com/dop251/goja v0.0.0-20250309171923-bcd7cc6bf64c
 	github.com/ethereum/go-ethereum v1.15.7
-	github.com/fsnotify/fsnotify v1.8.0
+	github.com/fsnotify/fsnotify v1.9.0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/samber/lo v1.49.1
 	github.com/spf13/viper v1.20.1
