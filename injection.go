@@ -2,6 +2,7 @@ package main
 
 import (
 	"io"
+	"log/slog"
 	"strings"
 
 	"github.com/Bedrock-Technology/lambda/core"
@@ -52,12 +53,32 @@ var (
 				"hex_to_address":     "Converts a hexadecimal string to an Ethereum address.",
 				"strings_equal_fold": "Compares two strings case-insensitively.",
 				"hash_typed_data":    "Hashes a typed data object.",
-				"bech32_decode":      "Decodes a Bech32-encoded address.",
+				"bech32_address":     "Converts a Bech32 address to its prefix and encoded form.",
+				"decimal_add":        "Adds two decimal strings.",
+				"decimal_sub":        "Subtracts two decimal strings.",
+				"decimal_mul":        "Multiplies two decimal strings.",
+				"decimal_divround":   "Divides two decimal strings and rounds the result.",
 			},
 			"hex_to_address":     core.HexToAddress,
 			"strings_equal_fold": strings.EqualFold,
 			"hash_typed_data":    core.HashTypedData,
 			"bech32_address":     core.Bech32Address,
+			"decimal_add":        core.DecimalAdd,
+			"decimal_sub":        core.DecimalSub,
+			"decimal_mul":        core.DecimalMul,
+			"decimal_divround":   core.DecimalDivRound,
+		},
+		"slog": {
+			"description": map[string]any{
+				"debug": "Logs a debug message.",
+				"info":  "Logs an info message.",
+				"warn":  "Logs a warning message.",
+				"error": "Logs an error message.",
+			},
+			"debug": slog.Debug,
+			"info":  slog.Info,
+			"warn":  slog.Warn,
+			"error": slog.Error,
 		},
 	}
 )
