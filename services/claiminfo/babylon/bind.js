@@ -1,4 +1,4 @@
-var { crypto, vars, db, utils } = LambdaHelper
+var { crypto, net, vars, db, utils, slog } = LambdaHelper
 
 var tableName = vars.babylon_info_table
 
@@ -8,7 +8,33 @@ function require(x, msg) {
     }
 }
 
+var rpcMap = {
+    '1': 'https://eth.llamarpc.com',
+    '10': 'https://optimism.drpc.org',
+    '56': 'https://binance.llamarpc.com',
+    '196': 'https://rpc.xlayer.tech',
+    '7000': 'https://zeta-chain.drpc.org',
+    '34443': 'https://mainnet.mode.network',
+    '42161': 'https://arbitrum.drpc.org',
+    '59144': 'https://linea-rpc.publicnode.com',
+    '60808': 'https://rpc.gobob.xyz',
+    '534352': 'https://rpc.scroll.io',
+    '169': 'https://pacific-rpc.manta.network/http',
+    '810180': 'https://rpc.zklink.io',
+    '223': 'https://rpc.bsquared.network',
+    '4200': 'https://rpc.merlinchain.io',
+    '5000': 'https://mantle-rpc.publicnode.com',
+    '200901': 'https://rpc.bitlayer.org',
+    '4689': 'https://babel-api.mainnet.iotex.io',
+    '167000': 'https://rpc.mainnet.taiko.xyz',
+    '80094': 'https://rpc.berachain.com',
+    '146': 'https://sonic-rpc.publicnode.com',
+    '43111': 'https://rpc.hemi.network/rpc',
+}
+
 var bodyObj = JSON.parse(vars.req.body)
+
+slog.debug('[Bind]', 'req_body', vars.req.body)
 
 var standardAddr = utils.hex_to_address(bodyObj.address)
 require(utils.strings_equal_fold(standardAddr, bodyObj.address), 'invalid addr')
@@ -44,7 +70,42 @@ var typedData = {
 
 var hash = utils.hash_typed_data(JSON.stringify(typedData))
 var addr = crypto.ecrecover(hash, bodyObj.signature)
-require(addr == standardAddr, 'invalid signature')
+
+slog.debug('[Bind]', 'hash', hash, 'addr', addr)
+
+//require(addr == standardAddr, 'invalid signature')
+if (addr != standardAddr) {
+    // eip 1271
+    var rpcRaw = rpcMap[bodyObj.chain_id]
+
+    var rpcReq = {
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'eth_call',
+        params: [
+            {
+                to: standardAddr,
+                data: `0x1626ba7e${hash.replace("0x", "")}00000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000041${bodyObj.signature.replace("0x", "")}00000000000000000000000000000000000000000000000000000000000000`,
+            },
+            'latest',
+        ],
+    }
+
+    slog.debug('[Bind] before fetch', 'chain_id', bodyObj.chain_id, 'rpcRaw', rpcRaw, 'req', JSON.stringify(rpcReq))
+
+    var fetchResp = net.fetch(rpcRaw, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(rpcReq),
+    })
+
+    slog.debug('[Bind] fetch result', 'body', fetchResp.body)
+
+    var rpcRes = JSON.parse(fetchResp.body)
+    require(rpcRes.result === '0x1626ba7e00000000000000000000000000000000000000000000000000000000', 'invalid signature')
+}
 
 db.insert(`${tableName}`, {
     created_at: (new Date()).toJSON(),
@@ -54,7 +115,7 @@ db.insert(`${tableName}`, {
     signature: bodyObj.signature,
 })
 
-var info = db.select(`select address, babylon_address, created_at from ${tableName} where address='${addr}' limit 1`)
+var info = db.select(`select address, babylon_address, created_at from ${tableName} where address='${standardAddr}' limit 1`)
 
 var resp = null
 if (info.length > 0) {
