@@ -1,5 +1,7 @@
 var { crypto, db, vars, utils } = LambdaHelper
 
+var tableName = vars.babylon_info_table
+
 function firstOr(x, defaultValue) {
     if (x && x.length > 0) {
         return x[0]
@@ -17,7 +19,7 @@ var addr = firstOr(vars.req.query.addr, '')
 var standardAddr = utils.hex_to_address(addr)
 require(utils.strings_equal_fold(standardAddr, addr), 'invalid addr')
 
-var data = db.select(`select address, amount::numeric(20,8) as br, (boosted > 0) as boosted from public.br_airdrop where address='${standardAddr}' limit 1`)
+var data = db.select(`select address, babylon_address, created_at from ${tableName} where address='${standardAddr}' limit 1`)
 
 var resp = null
 if (data.length > 0) {

@@ -8,16 +8,29 @@ function require(x, msg) {
     }
 }
 
+require(false, 'disabled')
+
 var bodyObj = JSON.parse(vars.req.body)
 
 var standardAddr = utils.hex_to_address(bodyObj.address)
 require(utils.strings_equal_fold(standardAddr, bodyObj.address), 'invalid addr')
+
+var standardDepositAddr = utils.hex_to_address(bodyObj.deposit_address)
+require(utils.strings_equal_fold(standardDepositAddr, bodyObj.deposit_address), 'invalid addr')
+
+require(standardAddr != standardDepositAddr, 'deposit address should not equals to signer address')
+
+require(['Gate', 'Bitget', 'Bybit'].includes(bodyObj.cex_type), 'invalid cex_type')
+
+var data = db.select(`select address, amount::numeric(20,8) as br, (boosted > 0) as boosted from public.br_airdrop where address='${standardAddr}' limit 1`)
+require(data.length > 0 && data[0].br > 0, 'not eligible')
 
 var typedData = {
     primaryType: 'Deposit',
     types: {
         EIP712Domain: [
             { name: 'version', type: 'string' },
+            { name: 'chainId', type: 'uint256' },
         ],
         Deposit: [
             { name: 'Exchange Name', type: 'string' },
@@ -27,6 +40,7 @@ var typedData = {
     },
     domain: {
         version: '1',
+        chainId: bodyObj.chain_id,
     },
     message: {
         'Deposit Address': bodyObj.deposit_address,
