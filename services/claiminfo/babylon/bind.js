@@ -69,7 +69,10 @@ var typedData = {
 }
 
 var hash = utils.hash_typed_data(JSON.stringify(typedData))
-var addr = crypto.ecrecover(hash, bodyObj.signature)
+var addr = ''
+if (bodyObj.signature.length == 65 + 2) { // signature of EOA or contract with one signer
+    addr = crypto.ecrecover(hash, bodyObj.signature)
+}
 
 slog.debug('[Bind]', 'hash', hash, 'addr', addr)
 
@@ -85,7 +88,8 @@ if (addr != standardAddr) {
         params: [
             {
                 to: standardAddr,
-                data: `0x1626ba7e${hash.replace("0x", "")}00000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000041${bodyObj.signature.replace("0x", "")}00000000000000000000000000000000000000000000000000000000000000`,
+                // FIXME: max length of signature is 0xffffffff, it will be 66076419 signers
+                data: `0x1626ba7e${hash.replace("0x", "")}000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000${((bodyObj.signature.length - 2) / 2).toString(16).padStart(8, '0')}${bodyObj.signature.replace("0x", "")}`,
             },
             'latest',
         ],
