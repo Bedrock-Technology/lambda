@@ -1,2 +1,2 @@
 # lambda
-Lambda is the turing complete lightweighted preprocessor between backend service and browser.
+Lambda is the turing complete lightweighted pre-processor and post-processor between backend service and browser.
