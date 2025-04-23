@@ -2,11 +2,15 @@ package core
 
 import (
 	"encoding/json"
+	"fmt"
 	"log/slog"
 
+	smt "github.com/FantasyJony/openzeppelin-merkle-tree-go/standard_merkle_tree"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/signer/core/apitypes"
+	"github.com/samber/lo"
 )
 
 func Keccak256(data string) string {
@@ -50,4 +54,59 @@ func HashTypedData(typedDataJson string) (string, error) {
 	}
 
 	return hexutil.Encode(hash), nil
+}
+
+type MerkleArgs struct {
+	Address string `json:"address"`
+	Amount  string `json:"amount"`
+}
+
+type MerkleTree struct {
+	Root  string              `json:"root"`
+	Proof map[string][]string `json:"proof"`
+}
+
+func Merkle(args []MerkleArgs) (*MerkleTree, error) {
+	leaves := lo.Map(args, func(a MerkleArgs, _ int) []any {
+		return []any{
+			any(smt.SolAddress(a.Address)),
+			any(smt.SolNumber(a.Amount)),
+		}
+	})
+
+	leafEncodings := []string{
+		smt.SOL_ADDRESS,
+		smt.SOL_UINT256,
+	}
+
+	tree, err := smt.Of(leaves, leafEncodings)
+	if err != nil {
+		return nil, err
+	}
+
+	proofMap := make(map[string][]string)
+	for _, leaf := range leaves {
+		proof, err := tree.GetProof(leaf)
+		if err != nil {
+			return nil, err
+		}
+
+		ok, err := tree.Verify(proof, leaf)
+		if err != nil {
+			return nil, err
+		}
+
+		if !ok {
+			return nil, fmt.Errorf("invalid proof for leaf %v", leaf)
+		}
+
+		proofMap[leaf[0].(common.Address).Hex()] = lo.Map(proof, func(p []byte, _ int) string {
+			return hexutil.Encode(p)
+		})
+	}
+
+	return &MerkleTree{
+		Root:  hexutil.Encode(tree.GetRoot()),
+		Proof: proofMap,
+	}, nil
 }
