@@ -1,6 +1,9 @@
 package core
 
 import (
+	"encoding/csv"
+	"os"
+
 	"github.com/cosmos/cosmos-sdk/types/bech32"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/shopspring/decimal"
@@ -82,4 +85,15 @@ func DecimalDivRound(a, b string, precision int32) (string, error) {
 
 	decA = decA.DivRound(decB, precision)
 	return decA.String(), nil
+}
+
+func CSVRead(filename string) ([][]string, error) {
+	f, err := os.OpenFile(filename, os.O_RDONLY, 0644)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	r := csv.NewReader(f)
+	return r.ReadAll()
 }

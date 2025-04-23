@@ -18,9 +18,11 @@ var (
 			"description": map[string]any{
 				"keccak256": "Calculates the Keccak-256 hash of the input.",
 				"ecrecover": "Recovers the address associated with the public key from a message and a signature.",
+				"merkle":    "Generates a Merkle tree and provides its root hash.",
 			},
 			"keccak256": core.Keccak256,
 			"ecrecover": core.Ecrecover,
+			"merkle":    core.Merkle,
 		},
 		"net": {
 			"description": map[string]any{
@@ -58,6 +60,7 @@ var (
 				"decimal_sub":        "Subtracts two decimal strings.",
 				"decimal_mul":        "Multiplies two decimal strings.",
 				"decimal_divround":   "Divides two decimal strings and rounds the result.",
+				"csv_read":           "Reads a CSV file and returns its contents.",
 			},
 			"hex_to_address":     core.HexToAddress,
 			"strings_equal_fold": strings.EqualFold,
@@ -67,6 +70,7 @@ var (
 			"decimal_sub":        core.DecimalSub,
 			"decimal_mul":        core.DecimalMul,
 			"decimal_divround":   core.DecimalDivRound,
+			"csv_read":           core.CSVRead,
 		},
 		"slog": {
 			"description": map[string]any{
