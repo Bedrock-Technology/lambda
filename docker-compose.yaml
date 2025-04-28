@@ -13,6 +13,7 @@ services:
       CFG_FILE: /app/conf/config.toml
       CFG_FORMAT: toml
     volumes:
+      - /home/ubuntu/lambda/assets:/app/assets
       - /home/ubuntu/lambda/services:/app/services
       - /home/ubuntu/lambda/conf:/app/conf
     ports:
