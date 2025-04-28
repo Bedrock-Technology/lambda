@@ -5,18 +5,16 @@ import (
 	"os"
 	"time"
 
-	"github.com/Bedrock-Technology/lambda/model"
-
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
 var (
-	db *gorm.DB
+	dbs = make(map[string]*gorm.DB)
 )
 
-func loadDatabase(dsn string) error {
+func loadDatabase(key, dsn string) error {
 	d, err := gorm.Open(postgres.New(postgres.Config{
 		DSN:                  dsn,
 		PreferSimpleProtocol: true,
@@ -32,6 +30,6 @@ func loadDatabase(dsn string) error {
 		return err
 	}
 
-	db = d
-	return db.AutoMigrate(&model.ClaimInfo{})
+	dbs[key] = d
+	return nil
 }

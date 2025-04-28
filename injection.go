@@ -35,19 +35,19 @@ var (
 				"insert": "Inserts a record into the postgres database.",
 				"select": "Selects records from the postgres database.",
 			},
-			"select": func(query string) ([]map[string]any, error) {
-				return core.TableSelect(db, query)
+			"select": func(db, query string) ([]map[string]any, error) {
+				return core.TableSelect(dbs[db], query)
 			},
-			"insert": func(table string, obj map[string]any) error {
-				return core.TableInsert(db, table, obj)
+			"insert": func(db, table string, obj map[string]any) error {
+				return core.TableInsert(dbs[db], table, obj)
 			},
 		},
 		"clickhouse": {
 			"description": map[string]any{
 				"select": "Selects records from the clickhouse database.",
 			},
-			"select": func(query string) ([]map[string]any, error) {
-				return core.TableSelect(clickhouseDB, query)
+			"select": func(db, query string) ([]map[string]any, error) {
+				return core.TableSelect(clickhouseDB[db], query)
 			},
 		},
 		"utils": {
@@ -90,9 +90,6 @@ var (
 func injectorFor(vm *goja.Runtime, ctx *gin.Context) *goja.Object {
 	mp := make(map[string]any)
 	for k, v := range injections {
-		if k == "db" && db == nil {
-			continue
-		}
 		mp[k] = mapToObject(vm, v)
 	}
 	mp["vars"] = makeVarsObj(vm, ctx)
