@@ -28,14 +28,14 @@ func main() {
 	serviceDir, apiPrefix, listen, postgresDSN, clickhouseDSN := cfg.ServicesDir, cfg.APIPrefix, cfg.Listen, cfg.PostgresDSN, cfg.ClickhouseDSN
 	cfgLock.RUnlock()
 
-	if postgresDSN != "" {
-		if err := loadDatabase(postgresDSN); err != nil {
+	for k, v := range postgresDSN {
+		if err := loadDatabase(k, v); err != nil {
 			slog.Error("loadDatabase()", "err", err)
 		}
 	}
 
-	if clickhouseDSN != "" {
-		if err := loadClickhouse(clickhouseDSN); err != nil {
+	for k, v := range clickhouseDSN {
+		if err := loadClickhouse(k, v); err != nil {
 			slog.Error("loadClickhouse()", "err", err)
 		}
 	}

@@ -9,10 +9,10 @@ import (
 )
 
 var (
-	clickhouseDB *gorm.DB
+	clickhouseDB = make(map[string]*gorm.DB)
 )
 
-func loadClickhouse(dsn string) error {
+func loadClickhouse(key, dsn string) error {
 	opt, err := clickhouse.ParseDSN(dsn)
 	if err != nil {
 		return err
@@ -31,6 +31,11 @@ func loadClickhouse(dsn string) error {
 	d.SetMaxOpenConns(100)
 	d.SetConnMaxLifetime(120 * time.Minute)
 
-	clickhouseDB, err = gorm.Open(clickhouseDriver.New(clickhouseDriver.Config{Conn: d}))
-	return err
+	db, err := gorm.Open(clickhouseDriver.New(clickhouseDriver.Config{Conn: d}))
+	if err != nil {
+		return err
+	}
+
+	clickhouseDB[key] = db
+	return nil
 }

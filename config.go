@@ -11,13 +11,14 @@ import (
 )
 
 type Config struct {
-	LogLevel      string `mapstructure:"log_level"`
-	Listen        string `mapstructure:"listen"`
-	Watchexec     string `mapstructure:"watchexec"`
-	ServicesDir   string `mapstructure:"services_dir"`
-	APIPrefix     string `mapstructure:"api_prefix"`
-	PostgresDSN   string `mapstructure:"postgres_dsn"`
-	ClickhouseDSN string `mapstructure:"clickhouse_dsn"`
+	LogLevel    string `mapstructure:"log_level"`
+	Listen      string `mapstructure:"listen"`
+	Watchexec   string `mapstructure:"watchexec"`
+	ServicesDir string `mapstructure:"services_dir"`
+	APIPrefix   string `mapstructure:"api_prefix"`
+
+	PostgresDSN   map[string]string `mapstructure:"postgres_dsn"`
+	ClickhouseDSN map[string]string `mapstructure:"clickhouse_dsn"`
 
 	Vars     map[string]string `mapstructure:"vars"`
 	VarsDesc map[string]string `mapstructure:"vars_desc"`
