@@ -12,8 +12,8 @@ import (
 	"github.com/samber/lo"
 )
 
-var (
-	injections = map[string]map[string]any{
+func makeInjections(ctx *gin.Context) map[string]map[string]any {
+	return map[string]map[string]any{
 		"crypto": {
 			"description": map[string]any{
 				"keccak256": "Calculates the Keccak-256 hash of the input.",
@@ -84,11 +84,23 @@ var (
 			"warn":  slog.Warn,
 			"error": slog.Error,
 		},
+		"shared": {
+			"dict_get": func(key string) (any, bool) {
+				serviceName, _ := ctx.Get(serviceNameKey)
+				return core.DictGet(serviceName.(string), key)
+			},
+			"dict_set": func(key string, val any) {
+				serviceName, _ := ctx.Get(serviceNameKey)
+				core.DictSet(serviceName.(string), key, val)
+			},
+		},
 	}
-)
+}
 
 func injectorFor(vm *goja.Runtime, ctx *gin.Context) *goja.Object {
 	mp := make(map[string]any)
+
+	injections := makeInjections(ctx)
 	for k, v := range injections {
 		mp[k] = mapToObject(vm, v)
 	}
