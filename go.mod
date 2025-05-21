@@ -9,7 +9,7 @@ require (
 	github.com/dop251/goja v0.0.0-20250309171923-bcd7cc6bf64c
 	github.com/ethereum/go-ethereum v1.15.9
 	github.com/fsnotify/fsnotify v1.9.0
-	github.com/gin-gonic/gin v1.10.0
+	github.com/gin-gonic/gin v1.10.1
 	github.com/samber/lo v1.49.1
 	github.com/shopspring/decimal v1.4.0
 	github.com/spf13/viper v1.20.1
