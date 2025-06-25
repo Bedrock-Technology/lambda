@@ -35,8 +35,8 @@ var (
 				"insert": "Inserts a record into the postgres database.",
 				"select": "Selects records from the postgres database.",
 			},
-			"select": func(db, query string) ([]map[string]any, error) {
-				return core.TableSelect(dbs[db], query)
+			"select": func(db, query string, values ...any) ([]map[string]any, error) {
+				return core.TableSelect(dbs[db], query, values...)
 			},
 			"insert": func(db, table string, obj map[string]any) error {
 				return core.TableInsert(dbs[db], table, obj)
@@ -46,13 +46,14 @@ var (
 			"description": map[string]any{
 				"select": "Selects records from the clickhouse database.",
 			},
-			"select": func(db, query string) ([]map[string]any, error) {
-				return core.TableSelect(clickhouseDB[db], query)
+			"select": func(db, query string, values ...any) ([]map[string]any, error) {
+				return core.TableSelect(clickhouseDB[db], query, values...)
 			},
 		},
 		"utils": {
 			"description": map[string]any{
 				"hex_to_address":     "Converts a hexadecimal string to an Ethereum address.",
+				"hex_to_hash":        "Converts a hexadecimal string to an Ethereum hash.",
 				"strings_equal_fold": "Compares two strings case-insensitively.",
 				"hash_typed_data":    "Hashes a typed data object.",
 				"bech32_address":     "Converts a Bech32 address to its prefix and encoded form.",
