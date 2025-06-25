@@ -13,6 +13,10 @@ func HexToAddress(address string) string {
 	return common.HexToAddress(address).Hex()
 }
 
+func HexToHash(input string) string {
+	return common.HexToHash(input).Hex()
+}
+
 func Bech32Address(address string) (string, string, error) {
 	prefix, data, err := bech32.DecodeAndConvert(address)
 	if err != nil {
