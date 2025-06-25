@@ -10,10 +10,10 @@ func TableInsert(db *gorm.DB, table string, obj map[string]any) error {
 	})
 }
 
-func TableSelect(db *gorm.DB, query string) ([]map[string]any, error) {
+func TableSelect(db *gorm.DB, query string, values ...any) ([]map[string]any, error) {
 	data := make([]map[string]any, 0)
 
-	if err := db.Raw(query).Find(&data).Error; err != nil {
+	if err := db.Raw(query, values...).Find(&data).Error; err != nil {
 		return nil, err
 	}
 
