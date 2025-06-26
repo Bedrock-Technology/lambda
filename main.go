@@ -19,6 +19,7 @@ var (
 			return vm
 		},
 	}
+	serviceNameKey = "serviceName"
 )
 
 func main() {
@@ -60,6 +61,7 @@ func serviceHandler(c *gin.Context) {
 	serviceName += ".js"
 
 	slog.Debug("serviceHandler()", "serviceName", serviceName)
+	c.Set(serviceNameKey, serviceName)
 
 	servicesLock.RLock()
 	service, ok := services[serviceName]
