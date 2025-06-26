@@ -16,13 +16,15 @@ func makeInjections(ctx *gin.Context) map[string]map[string]any {
 	return map[string]map[string]any{
 		"crypto": {
 			"description": map[string]any{
-				"keccak256": "Calculates the Keccak-256 hash of the input.",
-				"ecrecover": "Recovers the address associated with the public key from a message and a signature.",
-				"merkle":    "Generates a Merkle tree and provides its root hash.",
+				"keccak256":  "Calculates the Keccak-256 hash of the input.",
+				"ecrecover":  "Recovers the address associated with the public key from a message and a signature.",
+				"merkle":     "Generates a Merkle tree and provides its root hash.",
+				"try_merkle": "Attempts to retrieve a Merkle tree by name, returning the tree and a boolean indicating success.",
 			},
-			"keccak256": core.Keccak256,
-			"ecrecover": core.Ecrecover,
-			"merkle":    core.Merkle,
+			"keccak256":  core.Keccak256,
+			"ecrecover":  core.Ecrecover,
+			"merkle":     core.Merkle,
+			"try_merkle": core.TryMerkle,
 		},
 		"net": {
 			"description": map[string]any{
@@ -86,6 +88,14 @@ func makeInjections(ctx *gin.Context) map[string]map[string]any {
 			"error": slog.Error,
 		},
 		"shared": {
+			"description": map[string]any{
+				"dict_get":         "Gets a value from the shared dictionary for the current service.",
+				"dict_set":         "Sets a value in the shared dictionary for the current service.",
+				"dict_keys":        "Gets all keys from the shared dictionary for the current service.",
+				"dict_get_global":  "Gets a value from the global shared dictionary.",
+				"dict_set_global":  "Sets a value in the global shared dictionary.",
+				"dict_keys_global": "Gets all keys from the global shared dictionary.",
+			},
 			"dict_get": func(key string) (any, bool) {
 				serviceName, _ := ctx.Get(serviceNameKey)
 				return core.DictGet(serviceName.(string), key)
@@ -94,6 +104,13 @@ func makeInjections(ctx *gin.Context) map[string]map[string]any {
 				serviceName, _ := ctx.Get(serviceNameKey)
 				core.DictSet(serviceName.(string), key, val)
 			},
+			"dict_keys": func() []string {
+				serviceName, _ := ctx.Get(serviceNameKey)
+				return core.DictKeys(serviceName.(string))
+			},
+			"dict_get_global":  core.DictGetGlobal,
+			"dict_set_global":  core.DictSetGlobal,
+			"dict_keys_global": core.DictKeysGlobal,
 		},
 	}
 }

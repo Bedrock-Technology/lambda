@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"sync"
 
 	smt "github.com/FantasyJony/openzeppelin-merkle-tree-go/standard_merkle_tree"
 	"github.com/ethereum/go-ethereum/common"
@@ -62,11 +63,38 @@ type MerkleArgs struct {
 }
 
 type MerkleTree struct {
-	Root  string              `json:"root"`
-	Proof map[string][]string `json:"proof"`
+	Root    string              `json:"root"`
+	Proof   map[string][]string `json:"proof"`
+	Amounts map[string]string   `json:"amounts"`
 }
 
-func Merkle(args []MerkleArgs) (*MerkleTree, error) {
+func TryMerkle(name string) (*MerkleTree, bool) {
+	key := "merkle:" + name
+
+	f, ok := sharedDict.Load(key)
+	if !ok {
+		return nil, false
+	}
+
+	tree, err := f.(func() (*MerkleTree, error))()
+	if err != nil {
+		return nil, false
+	}
+
+	return tree, true
+}
+
+func Merkle(name string, args []MerkleArgs) (*MerkleTree, error) {
+	key := "merkle:" + name
+
+	f, _ := sharedDict.LoadOrStore(key, sync.OnceValues(func() (*MerkleTree, error) {
+		return merkle(args)
+	}))
+
+	return f.(func() (*MerkleTree, error))()
+}
+
+func merkle(args []MerkleArgs) (*MerkleTree, error) {
 	leaves := lo.Map(args, func(a MerkleArgs, _ int) []any {
 		return []any{
 			any(smt.SolAddress(a.Address)),
@@ -108,5 +136,8 @@ func Merkle(args []MerkleArgs) (*MerkleTree, error) {
 	return &MerkleTree{
 		Root:  hexutil.Encode(tree.GetRoot()),
 		Proof: proofMap,
+		Amounts: lo.SliceToMap(args, func(a MerkleArgs) (string, string) {
+			return a.Address, a.Amount
+		}),
 	}, nil
 }
