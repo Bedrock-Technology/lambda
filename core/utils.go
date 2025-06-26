@@ -2,7 +2,9 @@ package core
 
 import (
 	"encoding/csv"
+	"fmt"
 	"os"
+	"sync"
 
 	"github.com/cosmos/cosmos-sdk/types/bech32"
 	"github.com/ethereum/go-ethereum/common"
@@ -92,13 +94,14 @@ func DecimalDivRound(a, b string, precision int32) (string, error) {
 }
 
 func CSVRead(filename string) ([][]string, error) {
-	result, err, _ := singleflightGroup.Do("csvRead:"+filename, func() (any, error) {
+	key := "csvRead:" + filename
+
+	f, _ := sharedDict.LoadOrStore(key, sync.OnceValues(func() ([][]string, error) {
+		fmt.Println("Reading CSV file:", filename)
 		return csvRead(filename)
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.([][]string), nil
+	}))
+
+	return f.(func() ([][]string, error))()
 }
 
 func csvRead(filename string) ([][]string, error) {
@@ -110,8 +113,4 @@ func csvRead(filename string) ([][]string, error) {
 
 	r := csv.NewReader(f)
 	return r.ReadAll()
-}
-
-func SingleflightForget(key string) {
-	singleflightGroup.Forget(key)
 }
