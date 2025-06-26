@@ -119,9 +119,10 @@ type rawRequest struct {
 }
 
 func makeVarsObj(vm *goja.Runtime, ctx *gin.Context) *goja.Object {
-	cfgLock.RLock()
+	cfgLock.Lock()
 	vars, varsDesc := cfg.Vars, cfg.VarsDesc
-	cfgLock.RUnlock()
+	varsDesc["req"] = "The request object."
+	cfgLock.Unlock()
 
 	varsObj := mapToObject(vm, lo.MapEntries(vars, func(k1, v1 string) (string, any) {
 		return k1, v1
@@ -139,8 +140,6 @@ func makeVarsObj(vm *goja.Runtime, ctx *gin.Context) *goja.Object {
 		Body:    body,
 	}
 	varsObj.Set("req", r)
-
-	varsDesc["req"] = "The request object."
 	varsObj.Set("description", varsDesc)
 
 	return varsObj
