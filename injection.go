@@ -89,10 +89,12 @@ func makeInjections(ctx *gin.Context) map[string]map[string]any {
 		},
 		"shared": {
 			"description": map[string]any{
-				"dict_get":        "Gets a value from the shared dictionary for the current service.",
-				"dict_set":        "Sets a value in the shared dictionary for the current service.",
-				"dict_get_global": "Gets a value from the global shared dictionary.",
-				"dict_set_global": "Sets a value in the global shared dictionary.",
+				"dict_get":         "Gets a value from the shared dictionary for the current service.",
+				"dict_set":         "Sets a value in the shared dictionary for the current service.",
+				"dict_keys":        "Gets all keys from the shared dictionary for the current service.",
+				"dict_get_global":  "Gets a value from the global shared dictionary.",
+				"dict_set_global":  "Sets a value in the global shared dictionary.",
+				"dict_keys_global": "Gets all keys from the global shared dictionary.",
 			},
 			"dict_get": func(key string) (any, bool) {
 				serviceName, _ := ctx.Get(serviceNameKey)
@@ -102,8 +104,13 @@ func makeInjections(ctx *gin.Context) map[string]map[string]any {
 				serviceName, _ := ctx.Get(serviceNameKey)
 				core.DictSet(serviceName.(string), key, val)
 			},
-			"dict_get_global": core.DictGetGlobal,
-			"dict_set_global": core.DictSetGlobal,
+			"dict_keys": func() []string {
+				serviceName, _ := ctx.Get(serviceNameKey)
+				return core.DictKeys(serviceName.(string))
+			},
+			"dict_get_global":  core.DictGetGlobal,
+			"dict_set_global":  core.DictSetGlobal,
+			"dict_keys_global": core.DictKeysGlobal,
 		},
 	}
 }

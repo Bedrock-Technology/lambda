@@ -36,3 +36,25 @@ func DictSetGlobal(key string, val any) {
 		return true
 	})
 }
+
+func DictKeys(service string) []string {
+	keys := make([]string, 0)
+	sharedDict.Range(func(key, value any) bool {
+		if k, ok := key.(string); ok && k[:len(service)+1] == service+":" {
+			keys = append(keys, k[len(service)+1:])
+		}
+		return true
+	})
+	return keys
+}
+
+func DictKeysGlobal() []string {
+	keys := make([]string, 0)
+	sharedDict.Range(func(key, value any) bool {
+		if k, ok := key.(string); ok {
+			keys = append(keys, k)
+		}
+		return true
+	})
+	return keys
+}
