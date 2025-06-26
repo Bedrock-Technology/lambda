@@ -11,6 +11,11 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/signer/core/apitypes"
 	"github.com/samber/lo"
+	"golang.org/x/sync/singleflight"
+)
+
+var (
+	singleflightGroup = new(singleflight.Group)
 )
 
 func Keccak256(data string) string {
@@ -66,7 +71,17 @@ type MerkleTree struct {
 	Proof map[string][]string `json:"proof"`
 }
 
-func Merkle(args []MerkleArgs) (*MerkleTree, error) {
+func Merkle(key string, args []MerkleArgs) (*MerkleTree, error) {
+	tree, err, _ := singleflightGroup.Do("merkle:"+key, func() (any, error) {
+		return merkle(args)
+	})
+	if err != nil {
+		return nil, err
+	}
+	return tree.(*MerkleTree), nil
+}
+
+func merkle(args []MerkleArgs) (*MerkleTree, error) {
 	leaves := lo.Map(args, func(a MerkleArgs, _ int) []any {
 		return []any{
 			any(smt.SolAddress(a.Address)),

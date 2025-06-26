@@ -52,26 +52,28 @@ func makeInjections(ctx *gin.Context) map[string]map[string]any {
 		},
 		"utils": {
 			"description": map[string]any{
-				"hex_to_address":     "Converts a hexadecimal string to an Ethereum address.",
-				"hex_to_hash":        "Converts a hexadecimal string to an Ethereum hash.",
-				"strings_equal_fold": "Compares two strings case-insensitively.",
-				"hash_typed_data":    "Hashes a typed data object.",
-				"bech32_address":     "Converts a Bech32 address to its prefix and encoded form.",
-				"decimal_add":        "Adds two decimal strings.",
-				"decimal_sub":        "Subtracts two decimal strings.",
-				"decimal_mul":        "Multiplies two decimal strings.",
-				"decimal_divround":   "Divides two decimal strings and rounds the result.",
-				"csv_read":           "Reads a CSV file and returns its contents.",
+				"hex_to_address":      "Converts a hexadecimal string to an Ethereum address.",
+				"hex_to_hash":         "Converts a hexadecimal string to an Ethereum hash.",
+				"strings_equal_fold":  "Compares two strings case-insensitively.",
+				"hash_typed_data":     "Hashes a typed data object.",
+				"bech32_address":      "Converts a Bech32 address to its prefix and encoded form.",
+				"decimal_add":         "Adds two decimal strings.",
+				"decimal_sub":         "Subtracts two decimal strings.",
+				"decimal_mul":         "Multiplies two decimal strings.",
+				"decimal_divround":    "Divides two decimal strings and rounds the result.",
+				"csv_read":            "Reads a CSV file and returns its contents.",
+				"singleflight_forget": "Forgets a singleflight call by its key.",
 			},
-			"hex_to_address":     core.HexToAddress,
-			"strings_equal_fold": strings.EqualFold,
-			"hash_typed_data":    core.HashTypedData,
-			"bech32_address":     core.Bech32Address,
-			"decimal_add":        core.DecimalAdd,
-			"decimal_sub":        core.DecimalSub,
-			"decimal_mul":        core.DecimalMul,
-			"decimal_divround":   core.DecimalDivRound,
-			"csv_read":           core.CSVRead,
+			"hex_to_address":      core.HexToAddress,
+			"strings_equal_fold":  strings.EqualFold,
+			"hash_typed_data":     core.HashTypedData,
+			"bech32_address":      core.Bech32Address,
+			"decimal_add":         core.DecimalAdd,
+			"decimal_sub":         core.DecimalSub,
+			"decimal_mul":         core.DecimalMul,
+			"decimal_divround":    core.DecimalDivRound,
+			"csv_read":            core.CSVRead,
+			"singleflight_forget": core.SingleflightForget,
 		},
 		"slog": {
 			"description": map[string]any{
@@ -86,6 +88,12 @@ func makeInjections(ctx *gin.Context) map[string]map[string]any {
 			"error": slog.Error,
 		},
 		"shared": {
+			"description": map[string]any{
+				"dict_get":        "Gets a value from the shared dictionary for the current service.",
+				"dict_set":        "Sets a value in the shared dictionary for the current service.",
+				"dict_get_global": "Gets a value from the global shared dictionary.",
+				"dict_set_global": "Sets a value in the global shared dictionary.",
+			},
 			"dict_get": func(key string) (any, bool) {
 				serviceName, _ := ctx.Get(serviceNameKey)
 				return core.DictGet(serviceName.(string), key)
@@ -94,6 +102,8 @@ func makeInjections(ctx *gin.Context) map[string]map[string]any {
 				serviceName, _ := ctx.Get(serviceNameKey)
 				core.DictSet(serviceName.(string), key, val)
 			},
+			"dict_get_global": core.DictGetGlobal,
+			"dict_set_global": core.DictSetGlobal,
 		},
 	}
 }

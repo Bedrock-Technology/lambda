@@ -92,6 +92,16 @@ func DecimalDivRound(a, b string, precision int32) (string, error) {
 }
 
 func CSVRead(filename string) ([][]string, error) {
+	result, err, _ := singleflightGroup.Do("csvRead:"+filename, func() (any, error) {
+		return csvRead(filename)
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.([][]string), nil
+}
+
+func csvRead(filename string) ([][]string, error) {
 	f, err := os.OpenFile(filename, os.O_RDONLY, 0644)
 	if err != nil {
 		return nil, err
@@ -100,4 +110,8 @@ func CSVRead(filename string) ([][]string, error) {
 
 	r := csv.NewReader(f)
 	return r.ReadAll()
+}
+
+func SingleflightForget(key string) {
+	singleflightGroup.Forget(key)
 }
