@@ -59,6 +59,9 @@ func makeInjections(ctx *gin.Context) map[string]map[string]any {
 			"hset": func(db, key string, values ...any) (int64, error) {
 				return core.RedisHSet(redisDB[db], key, values...)
 			},
+			"hexpire": func(db, key string, duration string, fields ...string) ([]int64, error) {
+				return core.RedisHExpire(redisDB[db], key, duration, fields...)
+			},
 		},
 		"utils": {
 			"description": map[string]any{

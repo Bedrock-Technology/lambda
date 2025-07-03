@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"time"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -27,4 +28,17 @@ func RedisHSet(r *redis.Client, key string, values ...any) (int64, error) {
 	}
 
 	return r.HSet(context.Background(), key, values...).Result()
+}
+
+func RedisHExpire(r *redis.Client, key string, duration string, fields ...string) ([]int64, error) {
+	if r == nil {
+		return nil, ErrNilDB
+	}
+
+	du, err := time.ParseDuration(duration)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.HExpire(context.Background(), key, du, fields...).Result()
 }
