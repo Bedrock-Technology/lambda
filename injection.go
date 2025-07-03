@@ -52,6 +52,14 @@ func makeInjections(ctx *gin.Context) map[string]map[string]any {
 				return core.TableSelect(clickhouseDB[db], query, values...)
 			},
 		},
+		"redis": {
+			"hget": func(db, key, field string) (string, error) {
+				return core.RedisHGet(redisDB[db], key, field)
+			},
+			"hset": func(db, key string, values ...any) (int64, error) {
+				return core.RedisHSet(redisDB[db], key, values...)
+			},
+		},
 		"utils": {
 			"description": map[string]any{
 				"hex_to_address":     "Converts a hexadecimal string to an Ethereum address.",
@@ -64,8 +72,10 @@ func makeInjections(ctx *gin.Context) map[string]map[string]any {
 				"decimal_mul":        "Multiplies two decimal strings.",
 				"decimal_divround":   "Divides two decimal strings and rounds the result.",
 				"csv_read":           "Reads a CSV file and returns its contents.",
+				"first_or":           "Returns the first non-empty value from a list of values.",
 			},
 			"hex_to_address":     core.HexToAddress,
+			"hex_to_hash":        core.HexToHash,
 			"strings_equal_fold": strings.EqualFold,
 			"hash_typed_data":    core.HashTypedData,
 			"bech32_address":     core.Bech32Address,
@@ -74,6 +84,7 @@ func makeInjections(ctx *gin.Context) map[string]map[string]any {
 			"decimal_mul":        core.DecimalMul,
 			"decimal_divround":   core.DecimalDivRound,
 			"csv_read":           core.CSVRead,
+			"first_or":           lo.FirstOr[any],
 		},
 		"slog": {
 			"description": map[string]any{

@@ -1,21 +1,41 @@
 services:
+  redis:
+    image: redis/redis-stack-server:latest
+    pull_policy: missing
+
+    restart: unless-stopped
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   app:
     image: ghcr.io/bedrock-technology/lambda:latest
     pull_policy: always
+
     container_name: lambda
     restart: always
+
+    depends_on:
+      - redis
+
     healthcheck:
       test: wget --no-verbose --tries=1 --spider http://app:8000/version || exit 1
       interval: 30s
       timeout: 2s
       retries: 5
+
     environment:
       CFG_FILE: /app/conf/config.toml
       CFG_FORMAT: toml
+
     volumes:
       - /home/ubuntu/lambda/assets:/app/assets
       - /home/ubuntu/lambda/services:/app/services
       - /home/ubuntu/lambda/conf:/app/conf
+
     ports:
       - "127.0.0.1:8000:8000"
     extra_hosts:
