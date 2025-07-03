@@ -2,7 +2,7 @@ package core
 
 import (
 	"encoding/csv"
-	"fmt"
+	"log/slog"
 	"os"
 	"sync"
 
@@ -97,7 +97,7 @@ func CSVRead(filename string) ([][]string, error) {
 	key := "csvRead:" + filename
 
 	f, _ := sharedDict.LoadOrStore(key, sync.OnceValues(func() ([][]string, error) {
-		fmt.Println("Reading CSV file:", filename)
+		slog.Debug("CSVRead", "filename", filename)
 		return csvRead(filename)
 	}))
 

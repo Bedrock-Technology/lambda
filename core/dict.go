@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"log/slog"
 	"sync"
 )
 
@@ -24,7 +25,7 @@ func DictGetGlobal(key string) (any, bool) {
 func DictSet(service, key string, val any) {
 	sharedDict.Store(sharedDictKey(service, key), val)
 	sharedDict.Range(func(key, value any) bool {
-		fmt.Printf("[DEBUG] dump sharedDict, key: %s, value: %T\n", key, value)
+		slog.Debug("dump sharedDict", "key", key, "type", fmt.Sprintf("%T", value))
 		return true
 	})
 }
@@ -32,7 +33,7 @@ func DictSet(service, key string, val any) {
 func DictSetGlobal(key string, val any) {
 	sharedDict.Store(key, val)
 	sharedDict.Range(func(key, value any) bool {
-		fmt.Printf("[DEBUG] dump sharedDict, key: %s, value: %T\n", key, value)
+		slog.Debug("dump sharedDict", "key", key, "type", fmt.Sprintf("%T", value))
 		return true
 	})
 }
@@ -57,4 +58,15 @@ func DictKeysGlobal() []string {
 		return true
 	})
 	return keys
+}
+
+func DictDel(service, key string) {
+	realKey := sharedDictKey(service, key)
+	sharedDict.Delete(realKey)
+	slog.Debug("delete sharedDict", "key", realKey)
+}
+
+func DictDelGlobal(key string) {
+	sharedDict.Delete(key)
+	slog.Debug("delete sharedDict", "key", key)
 }
