@@ -26,7 +26,7 @@ func main() {
 	loadConfig()
 
 	cfgLock.RLock()
-	serviceDir, apiPrefix, listen, postgresDSN, clickhouseDSN := cfg.ServicesDir, cfg.APIPrefix, cfg.Listen, cfg.PostgresDSN, cfg.ClickhouseDSN
+	serviceDir, apiPrefix, listen, postgresDSN, clickhouseDSN, redisDSN := cfg.ServicesDir, cfg.APIPrefix, cfg.Listen, cfg.PostgresDSN, cfg.ClickhouseDSN, cfg.RedisDSN
 	cfgLock.RUnlock()
 
 	for k, v := range postgresDSN {
@@ -38,6 +38,12 @@ func main() {
 	for k, v := range clickhouseDSN {
 		if err := loadClickhouse(k, v); err != nil {
 			slog.Error("loadClickhouse()", "err", err)
+		}
+	}
+
+	for k, v := range redisDSN {
+		if err := loadRedis(k, v); err != nil {
+			slog.Error("loadRedis()", "err", err)
 		}
 	}
 

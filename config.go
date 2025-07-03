@@ -19,6 +19,7 @@ type Config struct {
 
 	PostgresDSN   map[string]string `mapstructure:"postgres_dsn"`
 	ClickhouseDSN map[string]string `mapstructure:"clickhouse_dsn"`
+	RedisDSN      map[string]string `mapstructure:"redis_dsn"`
 
 	Vars     map[string]string `mapstructure:"vars"`
 	VarsDesc map[string]string `mapstructure:"vars_desc"`
