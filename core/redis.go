@@ -42,3 +42,15 @@ func RedisHExpire(r *redis.Client, key string, duration string, fields ...string
 
 	return r.HExpire(context.Background(), key, du, fields...).Result()
 }
+
+func RedisHKeys(r *redis.Client, key string) ([]string, error) {
+	if r == nil {
+		return nil, ErrNilDB
+	}
+
+	keys, err := r.HKeys(context.Background(), key).Result()
+	if err != nil {
+		return nil, err
+	}
+	return keys, nil
+}
