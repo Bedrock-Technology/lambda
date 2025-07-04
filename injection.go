@@ -62,6 +62,9 @@ func makeInjections(ctx *gin.Context) map[string]map[string]any {
 			"hexpire": func(db, key string, duration string, fields ...string) ([]int64, error) {
 				return core.RedisHExpire(redisDB[db], key, duration, fields...)
 			},
+			"hkeys": func(db, key string) ([]string, error) {
+				return core.RedisHKeys(redisDB[db], key)
+			},
 		},
 		"utils": {
 			"description": map[string]any{
@@ -145,6 +148,7 @@ type rawRequest struct {
 	Method  string              `json:"method"`
 	Path    string              `json:"path"`
 	Query   map[string][]string `json:"query"`
+	Form    map[string]string   `json:"form"`
 	Headers map[string][]string `json:"headers"`
 	Body    string              `json:"body"`
 }
@@ -159,6 +163,23 @@ func makeVarsObj(vm *goja.Runtime, ctx *gin.Context) *goja.Object {
 		return k1, v1
 	}))
 
+	formMap := make(map[string]string)
+	if ctxForm, err := ctx.MultipartForm(); err == nil {
+		for k, v := range ctxForm.File {
+			if len(v) > 0 {
+				f := lo.Must(v[0].Open())
+				fileContent := lo.Must(io.ReadAll(f))
+				formMap[k] = string(fileContent)
+			}
+		}
+
+		for k, v := range ctxForm.Value {
+			if len(v) > 0 {
+				formMap[k] = v[0]
+			}
+		}
+	}
+
 	body := ""
 	if ctx.Request.Body != nil {
 		body = string(lo.Must(io.ReadAll(ctx.Request.Body)))
@@ -168,6 +189,7 @@ func makeVarsObj(vm *goja.Runtime, ctx *gin.Context) *goja.Object {
 		Path:    ctx.Request.URL.Path,
 		Query:   ctx.Request.URL.Query(),
 		Headers: ctx.Request.Header,
+		Form:    formMap,
 		Body:    body,
 	}
 	varsObj.Set("req", r)
