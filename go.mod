@@ -5,7 +5,7 @@ go 1.24.2
 require (
 	github.com/ClickHouse/clickhouse-go/v2 v2.37.2
 	github.com/FantasyJony/openzeppelin-merkle-tree-go v1.1.3
-	github.com/cosmos/cosmos-sdk v0.53.2
+	github.com/cosmos/cosmos-sdk v0.53.3
 	github.com/dop251/goja v0.0.0-20250624190929-4d26883d182a
 	github.com/ethereum/go-ethereum v1.16.0
 	github.com/fsnotify/fsnotify v1.9.0
