@@ -1,7 +1,7 @@
-github.com/ClickHouse/ch-go v0.66.1 h1:LQHFslfVYZsISOY0dnOYOXGkOUvpv376CCm8g7W74A4=
-github.com/ClickHouse/ch-go v0.66.1/go.mod h1:NEYcg3aOFv2EmTJfo4m2WF7sHB/YFbLUuIWv9iq76xY=
-github.com/ClickHouse/clickhouse-go/v2 v2.37.2 h1:wRLNKoynvHQEN4znnVHNLaYnrqVc9sGJmGYg+GGCfto=
-github.com/ClickHouse/clickhouse-go/v2 v2.37.2/go.mod h1:pH2zrBGp5Y438DMwAxXMm1neSXPPjSI7tD4MURVULw8=
+github.com/ClickHouse/ch-go v0.67.0 h1:18MQF6vZHj+4/hTRaK7JbS/TIzn4I55wC+QzO24uiqc=
+github.com/ClickHouse/ch-go v0.67.0/go.mod h1:2MSAeyVmgt+9a2k2SQPPG1b4qbTPzdGDpf1+bcHh+18=
+github.com/ClickHouse/clickhouse-go/v2 v2.38.0 h1:vgmMCSlxZQOieTlBKZw/ik7wmM9KpC92JtGTScE+bjE=
+github.com/ClickHouse/clickhouse-go/v2 v2.38.0/go.mod h1:m13KylpdcPzpIjznlfXp53IpdgZ7plTxOSCZnKphYZ8=
 github.com/FantasyJony/openzeppelin-merkle-tree-go v1.1.3 h1:KzMvCFet0baw6uJnxTE/His8YeRgaxlASd4/ISuTvzI=
 github.com/FantasyJony/openzeppelin-merkle-tree-go v1.1.3/go.mod h1:OiwyYqbtMkQH+VzA4b8lI+qHnExJy0fIdz+59/8nFes=
 github.com/Masterminds/semver/v3 v3.2.1 h1:RN9w6+7QoMeJVGyfmbcgs28Br8cvmnucEXnY0rYXWg0=
