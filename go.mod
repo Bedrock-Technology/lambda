@@ -3,7 +3,7 @@ module github.com/Bedrock-Technology/lambda
 go 1.24.2
 
 require (
-	github.com/ClickHouse/clickhouse-go/v2 v2.37.2
+	github.com/ClickHouse/clickhouse-go/v2 v2.39.0
 	github.com/FantasyJony/openzeppelin-merkle-tree-go v1.1.3
 	github.com/cosmos/cosmos-sdk v0.53.3
 	github.com/dop251/goja v0.0.0-20250630131328-58d95d85e994
@@ -20,7 +20,7 @@ require (
 )
 
 require (
-	github.com/ClickHouse/ch-go v0.66.1 // indirect
+	github.com/ClickHouse/ch-go v0.67.0 // indirect
 	github.com/andybalholm/brotli v1.2.0 // indirect
 	github.com/bits-and-blooms/bitset v1.22.0 // indirect
 	github.com/bytedance/sonic v1.13.3 // indirect
