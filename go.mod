@@ -16,7 +16,7 @@ require (
 	github.com/spf13/viper v1.20.1
 	gorm.io/driver/clickhouse v0.7.0
 	gorm.io/driver/postgres v1.6.0
-	gorm.io/gorm v1.30.0
+	gorm.io/gorm v1.30.1
 )
 
 require (
