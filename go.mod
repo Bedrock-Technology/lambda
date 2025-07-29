@@ -5,7 +5,7 @@ go 1.24.2
 require (
 	github.com/ClickHouse/clickhouse-go/v2 v2.37.2
 	github.com/FantasyJony/openzeppelin-merkle-tree-go v1.1.3
-	github.com/cosmos/cosmos-sdk v0.53.3
+	github.com/cosmos/cosmos-sdk v0.53.4
 	github.com/dop251/goja v0.0.0-20250630131328-58d95d85e994
 	github.com/ethereum/go-ethereum v1.16.1
 	github.com/fsnotify/fsnotify v1.9.0
@@ -72,7 +72,7 @@ require (
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.14.0 // indirect
 	github.com/spf13/cast v1.9.2 // indirect
-	github.com/spf13/pflag v1.0.6 // indirect
+	github.com/spf13/pflag v1.0.7 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/supranational/blst v0.3.15 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
