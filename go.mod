@@ -7,7 +7,7 @@ require (
 	github.com/FantasyJony/openzeppelin-merkle-tree-go v1.1.3
 	github.com/cosmos/cosmos-sdk v0.53.3
 	github.com/dop251/goja v0.0.0-20250630131328-58d95d85e994
-	github.com/ethereum/go-ethereum v1.16.1
+	github.com/ethereum/go-ethereum v1.16.3
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/gin-gonic/gin v1.10.1
 	github.com/redis/go-redis/v9 v9.11.0
